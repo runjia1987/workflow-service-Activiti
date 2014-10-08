@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="risk_deal" name="交易风险处理流程" isExecutable="true">
+    <documentation>交易风险处理</documentation>
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <userTask id="utask_distribute_order" name="派发风险工单" activiti:candidateGroups="235">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${addCandidateGroupHandler}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="utask_upload_cert" name="上传凭证" activiti:candidateGroups="236">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${addCandidateGroupHandler}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow2" sourceRef="utask_distribute_order" targetRef="utask_upload_cert"></sequenceFlow>
+    <userTask id="utask_verify" name="终审" activiti:candidateGroups="237">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${addCandidateGroupHandler}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow6" sourceRef="utask_verify" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow8" name="不通过" sourceRef="exclusivegateway2" targetRef="utask_upload_cert">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!verifyPass}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="utask_close" name="关闭" activiti:candidateGroups="238">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${addCandidateGroupHandler}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow10" name="通过" sourceRef="exclusivegateway2" targetRef="utask_close">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${verifyPass}]]></conditionExpression>
+    </sequenceFlow>
+    <inclusiveGateway id="inclusivegateway1" name="Inclusive Gateway"></inclusiveGateway>
+    <sequenceFlow id="flow12" sourceRef="startevent1" targetRef="inclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow13" sourceRef="inclusivegateway1" targetRef="utask_distribute_order"></sequenceFlow>
+    <sequenceFlow id="flow14" sourceRef="inclusivegateway1" targetRef="utask_close"></sequenceFlow>
+    <sequenceFlow id="flow15" sourceRef="utask_upload_cert" targetRef="utask_verify"></sequenceFlow>
+    <endEvent id="terminateendevent1" name="TerminateEndEvent">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow16" sourceRef="utask_close" targetRef="terminateendevent1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_risk_deal">
+    <bpmndi:BPMNPlane bpmnElement="risk_deal" id="BPMNPlane_risk_deal">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="10.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="utask_distribute_order" id="BPMNShape_utask_distribute_order">
+        <omgdc:Bounds height="55.0" width="105.0" x="120.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="utask_upload_cert" id="BPMNShape_utask_upload_cert">
+        <omgdc:Bounds height="55.0" width="105.0" x="250.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="utask_verify" id="BPMNShape_utask_verify">
+        <omgdc:Bounds height="55.0" width="105.0" x="460.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="492.0" y="151.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="utask_close" id="BPMNShape_utask_close">
+        <omgdc:Bounds height="55.0" width="105.0" x="460.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="inclusivegateway1" id="BPMNShape_inclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="60.0" y="58.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="terminateendevent1" id="BPMNShape_terminateendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="630.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="225.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="512.0" y="105.0"></omgdi:waypoint>
+        <omgdi:waypoint x="512.0" y="151.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="492.0" y="171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="105.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="33.0" x="427.0" y="179.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="512.0" y="191.0"></omgdi:waypoint>
+        <omgdi:waypoint x="512.0" y="220.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="22.0" x="522.0" y="191.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="45.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="60.0" y="78.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="100.0" y="78.0"></omgdi:waypoint>
+        <omgdi:waypoint x="119.0" y="78.0"></omgdi:waypoint>
+        <omgdi:waypoint x="120.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
+        <omgdi:waypoint x="80.0" y="98.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="247.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="355.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="565.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="630.0" y="247.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

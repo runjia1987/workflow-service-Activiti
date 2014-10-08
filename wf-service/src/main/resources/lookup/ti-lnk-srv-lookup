@@ -1,0 +1,1 @@
+ti-lnk.workflow=amqp://'/amqp/wf-queue'/workflow-srv-queue
