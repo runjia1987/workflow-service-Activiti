@@ -97,6 +97,7 @@ public class WorkflowProcessServiceImpl implements WorkflowProcessService {
 			// UPDATE status to completed.
 			process.setStatus(ProcessStatusEnum.COMPLETED.name());
 			workflowProcessDao.updateProcess(process);
+			logger.info("set process " + innerProcessId + " to status COMPLETED.");
 			UserAccount userAccount = process.getInitUserAccount();
 			if (userAccount != null ){
 				// notify this init user by email or else..
@@ -130,7 +131,6 @@ public class WorkflowProcessServiceImpl implements WorkflowProcessService {
 		pse.setStatus(process.getStatus());
 		pse.setInnerProcessId(innerProcessId);
 		
-		
 		List<HistoricTaskInstance> historyTasksList = historyService.createHistoricTaskInstanceQuery().processInstanceId(innerProcessId)
 				.orderByHistoricTaskInstanceStartTime().desc().list();
 		if (historyTasksList != null && historyTasksList.size() > 0) {
@@ -138,7 +138,7 @@ public class WorkflowProcessServiceImpl implements WorkflowProcessService {
 		}
 		
 		if ( ProcessStatusEnum.STARTED.name().equals(pse.getStatus()) 
-				|| ProcessStatusEnum.COMPLETED.name().equals(pse.getStatus())
+				// || ProcessStatusEnum.COMPLETED.name().equals(pse.getStatus())
 				|| ProcessStatusEnum.SUSPENDED.name().equals(pse.getStatus()) ) {
 			String diagrampath = diagramPictureDrawer.drawDiagram(innerProcessId);
 			pse.setDiagramPicturePath(diagrampath);

@@ -59,6 +59,8 @@ public class GlobalExecutionListener implements ExecutionListener, InitializingB
 			// check if this is the last activity node
 			if (checkIfEndActivity(currentActivityId, processDefinitionId)) {
 				// notify the init user
+				logger.info("currentActivityId " + currentActivityId
+							+ " is last activity of process " + processDefinitionId);
 				workflowProcessService.notifyWhenCompleted(delegateExecution.getProcessInstanceId());
 			}
 		}
@@ -69,31 +71,16 @@ public class GlobalExecutionListener implements ExecutionListener, InitializingB
 		ProcessDefinitionEntity pde = (ProcessDefinitionEntity)
 							rsImpl.getDeployedProcessDefinition(processDefinitionId);
 		
-		if(pde == null) return false;
-		
 		List<ActivityImpl> list = pde.getActivities();
 		
 		if(list == null) return false;
 		
 		for (ActivityImpl ai : list) {
 			String activity_type_ = (String) ai.getProperty("type");
+			logger.info("activity_type_: " + activity_type_);
 			
-			if (ACT_TYPE_endEvent.equals(activity_type_)) {
+			if (ai.getId().equals(activityId) && ACT_TYPE_endEvent.equals(activity_type_)) {
 				return true;
-			}
-			
-			if (ai.getId().equals(activityId) && ! ACT_TYPE_exclusiveGateway.equals(activity_type_) ) {
-				List<PvmTransition> outTransitions = ai.getOutgoingTransitions();
-				if (outTransitions == null || outTransitions.size() == 0)
-					return true;
-				
-				for(PvmTransition pt : outTransitions){
-					List<? extends PvmActivity> pList = pt.getDestination().getActivities();
-					if( pList == null || pList.isEmpty()) {
-						return true;
-					}
-				}
-				break;
 			}
 		}
 		return false;

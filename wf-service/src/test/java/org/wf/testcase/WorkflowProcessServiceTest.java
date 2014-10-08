@@ -59,7 +59,6 @@ public class WorkflowProcessServiceTest {
 		ProcessStatusEntity pse = workflowProcessService.getProcessStatus(processId);
 		System.out.println("first process status after STARTED: " + pse.toString());
 		
-		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("approved", true);
 		workflowTaskService.completeTask(pse.getCurrentTaskId(), paramMap, "runjia.zhu");
