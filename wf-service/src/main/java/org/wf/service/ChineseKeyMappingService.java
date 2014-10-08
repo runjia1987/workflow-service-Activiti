@@ -1,8 +1,6 @@
 package org.wf.service;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,24 +9,25 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 public class ChineseKeyMappingService implements InitializingBean {
 	
-	private String sourcesFolder;
+	private String loadResourcesPattern = "chinese/key/mapping/*.properties";
 	
 	private final Map<String, String> chineseKeyMappingMap = new HashMap<String, String>(1 << 8);
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		URL url = cl.getResource(sourcesFolder);
-		File folder = new File(url.getFile());
-		File[] mappings = folder.listFiles();
+		ResourcePatternResolver rpr = new PathMatchingResourcePatternResolver();
+		Resource[] resources = rpr.getResources(loadResourcesPattern);
 		
 		InputStream ins = null;
 		Properties prop = new Properties();
-		for (File mapping : mappings) {
-			ins = cl.getResourceAsStream(sourcesFolder + "/" + mapping.getName());
+		for (Resource resource : resources) {
+			ins = resource.getInputStream();
 			prop.load(ins);
 			
 			Set<Entry<Object, Object>> set = prop.entrySet();
@@ -47,10 +46,6 @@ public class ChineseKeyMappingService implements InitializingBean {
 	
 	public String getMapping(String key) {
 		return chineseKeyMappingMap.get(key);
-	}
-
-	public void setSourcesFolder(String sourcesFolder) {
-		this.sourcesFolder = sourcesFolder;
 	}
 
 }

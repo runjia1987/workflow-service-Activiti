@@ -42,7 +42,7 @@ public class DeployModelResourcesHepler implements InitializingBean {
 		DeploymentQuery dQuery = repositoryService.createDeploymentQuery();
 		
 		// list all resources under specified resourceDir
-		// consider only .xml files
+		// consider only .bpmn files
 		ResourcePatternResolver rpr = new PathMatchingResourcePatternResolver();
 		org.springframework.core.io.Resource[] rArray = rpr.getResources(loadResourcesPattern);
 		
@@ -66,6 +66,7 @@ public class DeployModelResourcesHepler implements InitializingBean {
 				} else {
 					Deployment d = historyDeployList.get(0);
 					try {
+						// the stream comes from built-in act_ge_bytearray(BYTES_ longblob) table
 						InputStream previousIns = repositoryService.getResourceAsStream(d.getId(), resourceName);
 						// compute the MessageDigest
 						byte[] previousMdBytes = getMessageDigest(previousIns);
@@ -115,7 +116,7 @@ public class DeployModelResourcesHepler implements InitializingBean {
 	}
 	
 	/**
-	 * get message  digest bytes, also close the inputStream
+	 * get message  digest bytes, and close the inputStream
 	 * @param ins
 	 * @return
 	 */
