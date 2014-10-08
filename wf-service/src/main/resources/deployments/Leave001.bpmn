@@ -11,7 +11,7 @@
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="flow4" sourceRef="reviewDecision" targetRef="rejected">
-    	<conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
+    	<conditionExpression xsi:type="tFormalExpression"><![CDATA[!${approved}]]></conditionExpression>
     </sequenceFlow>
     <userTask id="approved" name="Document Approved" activiti:assignee="Jack1" activiti:formKey="wf:approvedParallelTask">
       <documentation>The document was reviewed and approved.</documentation>
