@@ -73,13 +73,11 @@ public class GlobalExecutionListener implements ExecutionListener, InitializingB
 		
 		List<ActivityImpl> list = pde.getActivities();
 		
-		if(list == null) return false;
-		
 		for (ActivityImpl ai : list) {
 			String activity_type_ = (String) ai.getProperty("type");
-			logger.info("activity_type_: " + activity_type_);
 			
 			if (ai.getId().equals(activityId) && ACT_TYPE_endEvent.equals(activity_type_)) {
+				logger.info(activityId + " has activity_type: " + activity_type_);
 				return true;
 			}
 		}

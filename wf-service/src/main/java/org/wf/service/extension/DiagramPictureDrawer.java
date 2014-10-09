@@ -1,9 +1,11 @@
 package org.wf.service.extension;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.wf.service.utils.PropertyReader;
+import org.wf.service.utils.ServiceConstants;
 
 
 /**
@@ -59,10 +62,11 @@ public class DiagramPictureDrawer {
 	
 	private String storePicturePath;
 	
+	private volatile boolean setDiagramCanvas = false;
+	
 	@PostConstruct
 	public void init(){
-		storePicturePath = PropertyReader.getValue("storePicturePath");
-		
+		storePicturePath = PropertyReader.getValue(ServiceConstants.StorePicturePath);
 	}
 	
 	/**
@@ -80,19 +84,22 @@ public class DiagramPictureDrawer {
 		if( haiList == null || haiList.size() == 0) {
 			return null;
 		}
-		
-		String activityId = haiList.get(0).getActivityId();
+		// get last activity id
+		String activityId = haiList.get(haiList.size() - 1).getActivityId();
 		String cacheKey = processInstanceId + "#" + activityId;
-		logger.info("start to fetch from cache: " + cacheKey);
+		
 		final String path = diagramPictureCache.get(cacheKey);
-		if ( StringUtils.isNotEmpty(path) ) return path;
+		if ( StringUtils.isNotEmpty(path) ) {
+			logger.info("found in diagram cache: " + cacheKey);
+			return path;
+		}
 		
 		logger.info("not found in diagramPictureCache, try to fetch from runtime services.");
 		List<String> highlightedHistoryActivities = new ArrayList<String>();
 		for (HistoricActivityInstance hai : haiList) {
 			highlightedHistoryActivities.add(hai.getActivityId());
+			logger.info("highlightedHistoryActivities: " + highlightedHistoryActivities);
 		}
-		logger.info("highlighted HistoryActivities are found.");
 		
 		// get highlighted flow id list from active running
 		RepositoryServiceImpl rsImpl = (RepositoryServiceImpl) repositoryService;
@@ -106,6 +113,7 @@ public class DiagramPictureDrawer {
 						((ProcessEngineImpl)processEngine ).getProcessEngineConfiguration());
 		
 		logger.info("start to draw and save to local server...");
+		setDiagramCanvas();
 		InputStream ins = ProcessDiagramGenerator.generateDiagram ( bm, "png",  
 	             highlightedHistoryActivities,
 	             activeHightlightedFlows);
@@ -117,6 +125,25 @@ public class DiagramPictureDrawer {
 			diagramPictureCache.put(cacheKey, pictureFileName);
 		}
 		return pictureFileName;
+	}
+	
+	public void setDiagramCanvas(){
+		if ( ! setDiagramCanvas) {
+			try {
+				Class<?> cl = Class.forName("org.activiti.engine.impl.bpmn.diagram.ProcessDiagramCanvas",
+							true, Thread.currentThread().getContextClassLoader());
+				// highlight the label color
+				Field field = cl.getDeclaredField("LABEL_COLOR");
+				field.setAccessible(true);
+				Color LABEL_COLOR = (Color) field.get(null);
+				LABEL_COLOR = Color.BLACK;
+				field.set(null, LABEL_COLOR);
+				
+			} catch (Exception e) {
+				logger.error("", e);
+			}
+			setDiagramCanvas = true;
+		}
 	}
 	
 	/**
@@ -153,7 +180,7 @@ public class DiagramPictureDrawer {
 				}
 			}
 		}
-		logger.info("findHighLightedFlows return " + activeHightlightedFlows.size() + " highlighted flows.");
+		logger.info("findHighLightedFlows return highlighted flows: " + activeHightlightedFlows);
 		return activeHightlightedFlows;
 	}
 	

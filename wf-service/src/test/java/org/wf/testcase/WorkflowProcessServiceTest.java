@@ -46,10 +46,10 @@ public class WorkflowProcessServiceTest {
 		// set fields
 		process.setInnerProcessId(innerProcessId);
 		process.setAcceptTimeStamp(new Timestamp(new Date().getTime()));
-		process.setInitUserName("Jack321");
+		process.setInitUserName("test_init_user");
 		process.setOuterSequenceId("HDSNDA78312GJ");
 		process.setProcessDetail("some desc here, a new incoming process.");
-		process.setProcessModelKey("activitiParallelReview");
+		process.setProcessModelKey("request_leave");
 		process.setSourceSystem("myApp");
 		process.setStatus(ProcessStatusEnum.NEW.name());
 		
@@ -57,22 +57,26 @@ public class WorkflowProcessServiceTest {
 		System.out.println("processId: " + processId);
 		
 		ProcessStatusEntity pse = workflowProcessService.getProcessStatus(processId);
-		System.out.println("first process status after STARTED: " + pse.toString());
+		System.out.println("1st process status after STARTED: " + pse.toString());
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("approved", true);
-		workflowTaskService.completeTask(pse.getCurrentTaskId(), paramMap, "runjia.zhu");
+		//paramMap.put("approved", true);
+		paramMap.put("deptLeaderPass", true);
+		workflowTaskService.completeTask(pse.getCurrentTaskId(), paramMap, "Jack123");
 		
 		pse = workflowProcessService.getProcessStatus(processId);
-		System.out.println("next process status: " + pse.toString());
+		System.out.println("2nd process status: " + pse.toString());
+		
 		paramMap.clear();
-		paramMap.put("key", "I wanna a rest, somebody else do this for me.");
+		paramMap.put("hrPass", false);
 		final String anotherUser = "I_am_a_test_user";
 		workflowTaskService.assign(pse.getCurrentTaskId(), paramMap, anotherUser);
-		
 		workflowTaskService.completeTask(pse.getCurrentTaskId(), paramMap, "I_am_a_test_user");
 		
-		
+		pse = workflowProcessService.getProcessStatus(processId);
+		System.out.println("3rd process status: " + pse.toString());
+		paramMap.clear();
+		paramMap.put("modifyApplyContentProcessor", true);
 		
 		/**
 		workflowProcessService.suspendProcess(processId);

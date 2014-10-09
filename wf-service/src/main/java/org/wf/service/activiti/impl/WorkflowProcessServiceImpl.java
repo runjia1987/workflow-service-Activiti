@@ -131,11 +131,9 @@ public class WorkflowProcessServiceImpl implements WorkflowProcessService {
 		pse.setStatus(process.getStatus());
 		pse.setInnerProcessId(innerProcessId);
 		
-		List<HistoricTaskInstance> historyTasksList = historyService.createHistoricTaskInstanceQuery().processInstanceId(innerProcessId)
-				.orderByHistoricTaskInstanceStartTime().desc().list();
-		if (historyTasksList != null && historyTasksList.size() > 0) {
-			pse.setCurrentTaskId(historyTasksList.get(0).getId());
-		}
+		Task task = taskService.createTaskQuery().processInstanceId(
+						innerProcessId).singleResult();
+		pse.setCurrentTaskId(task.getId());
 		
 		if ( ProcessStatusEnum.STARTED.name().equals(pse.getStatus()) 
 				// || ProcessStatusEnum.COMPLETED.name().equals(pse.getStatus())

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.wf.service.activiti.api.WorkflowTaskService;
 import org.wf.service.extension.DynamicTaskCmd;
+import org.wf.service.utils.ServiceConstants;
 
 @Transactional
 @Service("workflowTaskService")
@@ -51,7 +52,7 @@ public class WorkflowTaskServiceImpl implements WorkflowTaskService {
 	@Override
 	public void completeTask(String taskId, Map<String, Object> paramMap,
 			String userId) {
-		paramMap.put("userId", userId); // set the current userId
+		paramMap.put(ServiceConstants.CurrentUserIdKey, userId); // set the current userId
 
 		taskService.setVariables(taskId, paramMap);
 		taskService.complete(taskId);
@@ -62,13 +63,13 @@ public class WorkflowTaskServiceImpl implements WorkflowTaskService {
 			String userId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		String executionId = task.getExecutionId();
-		if (executionId == null)
-			return;
+		if (executionId == null) return;
 
 		ExecutionEntity execution = (ExecutionEntity) runtimeService
 				.createExecutionQuery().executionId(executionId).singleResult();
 		String currentActivitiId = execution.getActivityId(), previousActivityId = null;
 		
+		// order by activity startTime asc
 		List<HistoricActivityInstance> haiList = historyService.createHistoricActivityInstanceQuery()
 				.processInstanceId(task.getProcessInstanceId())
 				.orderByHistoricActivityInstanceStartTime().asc().list();
@@ -76,9 +77,10 @@ public class WorkflowTaskServiceImpl implements WorkflowTaskService {
 		for ( int i = 0; i < haiList.size(); i++) {
 			if (haiList.get(i).getActivityId() == currentActivitiId && i > 0) {
 				previousActivityId = haiList.get(i - 1).getActivityId();
+				break;
 			}
 		}
-		String rejectReason = userId + " rejects: " + paramMap.get("reason");
+		String rejectReason = userId + " rejects: "+ paramMap.get(ServiceConstants.RejectTaskReason);
 		
 		if (previousActivityId != null) {
 			((TaskServiceImpl) taskService).getCommandExecutor().execute(

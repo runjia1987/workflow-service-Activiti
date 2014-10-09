@@ -33,6 +33,7 @@ import org.wf.service.activiti.api.UserAccountService;
 import org.wf.service.activiti.api.WorkflowProcessService;
 import org.wf.service.model.UserAccount;
 import org.wf.service.utils.PropertyReader;
+import org.wf.service.utils.ServiceConstants;
 
 /**
  * global listener for task notifying, events [ create, assign, complete ]
@@ -127,12 +128,12 @@ public class GlobalTaskNotifyListener implements TaskListener, InitializingBean 
 				}
 			}
 			groupIds = null;userIds = null;
-			if ( EVENTNAME_CREATE.equals(event)) accountsList.clear();
 			
 			if (accountsList.size() == 0) {
-				String message = "taskId [" + taskId + "] " + delegateTask.getName() + " does not define any user or group";
+				String message = "taskId [" + taskId + "] " + delegateTask.getName()
+								+ " does not define any user or group";
 				if ( EVENTNAME_CREATE.equals(event)) {
-					String assignee = PropertyReader.getValue("defaultAssignee");
+					String assignee = PropertyReader.getValue(ServiceConstants.DefaultAssigneeKey);
 					logger.info(message + ", assign to default " + assignee);
 					delegateTask.setAssignee(assignee);
 				} else {
@@ -145,7 +146,7 @@ public class GlobalTaskNotifyListener implements TaskListener, InitializingBean 
 			// if complete event happens
 			if (EVENTNAME_COMPLETE.equals(event)) {
 				Map<String, Object> variables = taskService.getVariables(taskId);
-				String currentUserId = (String) variables.get("userId");
+				String currentUserId = (String) variables.get(ServiceConstants.CurrentUserIdKey);
 				if ( ! accountsList.contains(currentUserId)) {
 					throw new RuntimeException("current user " + currentUserId
 							+ " is not allowed to approve this task !!!");
@@ -154,7 +155,9 @@ public class GlobalTaskNotifyListener implements TaskListener, InitializingBean 
 				}
 			}
 			
-			notifyAssignee("", accountsList, null);
+			if (EVENTNAME_ASSIGNMENT.equals(event) || EVENTNAME_COMPLETE.equals(event)) {
+				notifyAssignee("", accountsList, null);
+			}
 		}
 	}
 	
@@ -183,7 +186,7 @@ public class GlobalTaskNotifyListener implements TaskListener, InitializingBean 
 			List<ActivityImpl> aList = pde.getActivities();
 			for (ActivityImpl ai : aList) {
 				
-				String activity_type_ = (String) ai.getProperty("type");
+				String activity_type_ = (String) ai.getProperty(ServiceConstants.ActivityTypeKey);
 				// only consider "userTask"
 				if (GlobalExecutionListener.ACT_TYPE_userTask.equals(activity_type_)) {
 					if (ai.getActivityBehavior() instanceof UserTaskActivityBehavior) {
