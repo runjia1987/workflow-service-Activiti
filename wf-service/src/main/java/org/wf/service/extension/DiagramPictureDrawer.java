@@ -98,8 +98,8 @@ public class DiagramPictureDrawer {
 		List<String> highlightedHistoryActivities = new ArrayList<String>();
 		for (HistoricActivityInstance hai : haiList) {
 			highlightedHistoryActivities.add(hai.getActivityId());
-			logger.info("highlightedHistoryActivities: " + highlightedHistoryActivities);
 		}
+		logger.info("highlightedHistoryActivities: " + highlightedHistoryActivities);
 		
 		// get highlighted flow id list from active running
 		RepositoryServiceImpl rsImpl = (RepositoryServiceImpl) repositoryService;
@@ -153,32 +153,31 @@ public class DiagramPictureDrawer {
 						List<HistoricActivityInstance> haiList ) {
 		List<String> activeHightlightedFlows = new ArrayList<String>();
 		
+		List<ActivityImpl> startTimeNodes = new ArrayList<ActivityImpl>();
 		for (int i = 0; i < haiList.size() - 1; i++) {
-			ActivityImpl activityImpl =  processDefinitionEntity.findActivity( haiList.get(i).getActivityId() );
-			List<ActivityImpl> sameStartTimeNodes = new  ArrayList<ActivityImpl>();
-			ActivityImpl sameActivityImpl1 = processDefinitionEntity.findActivity(
+			ActivityImpl activity =  processDefinitionEntity.findActivity( haiList.get(i).getActivityId() );
+			ActivityImpl tempActivity = processDefinitionEntity.findActivity(
 							haiList.get(i + 1).getActivityId() );
-			sameStartTimeNodes.add(sameActivityImpl1);
+			startTimeNodes.add(tempActivity);
 			
-			for (int j = i + 1; j < haiList.size() - 1; j++) {
-				HistoricActivityInstance activityImpl1 = haiList.get(j);
-				HistoricActivityInstance activityImpl2 = haiList.get(j + 1);
+			int j = i + 1;
+			if (j < haiList.size() - 1) {
+				HistoricActivityInstance hai_1 = haiList.get(j), hai_2 = haiList.get(j + 1);
 				
-				if (activityImpl1.getStartTime().equals(activityImpl2.getStartTime()) ) {
-					ActivityImpl sameActivityImpl2 = processDefinitionEntity.findActivity(activityImpl2.getActivityId());
-					sameStartTimeNodes.add(sameActivityImpl2);
-				} else {
-					break;
+				if (hai_1.getStartTime().equals(hai_2.getStartTime()) ) {
+					ActivityImpl tempActivity2 = processDefinitionEntity.findActivity(hai_2.getActivityId());
+					startTimeNodes.add(tempActivity2);
 				}
 			}
 			
-			List<PvmTransition> ptList = activityImpl.getOutgoingTransitions();
+			List<PvmTransition> ptList = activity.getOutgoingTransitions();
 			for (PvmTransition pt : ptList)  {
-				ActivityImpl pvmActivityImpl = (ActivityImpl) pt.getDestination();
-				if  (sameStartTimeNodes.contains(pvmActivityImpl)) {
+				ActivityImpl pvmActivity = (ActivityImpl) pt.getDestination();
+				if  (startTimeNodes.contains(pvmActivity)) {
 					activeHightlightedFlows.add(pt.getId());
 				}
 			}
+			startTimeNodes.clear();
 		}
 		logger.info("findHighLightedFlows return highlighted flows: " + activeHightlightedFlows);
 		return activeHightlightedFlows;

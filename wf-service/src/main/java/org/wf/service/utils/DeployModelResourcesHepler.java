@@ -54,10 +54,9 @@ public class DeployModelResourcesHepler implements InitializingBean {
 				byte[] currentMdBytes = getMessageDigest(ins);
 				boolean needDeploy = false;
 				
-				String resourceName = resource.getURL().getPath();
-				String deploymentName = resource.getFilename();
+				String resourceName = resource.getFilename();
 				// find the latest deployment for this
-				List<Deployment> historyDeployList = dQuery.deploymentName(deploymentName)
+				List<Deployment> historyDeployList = dQuery.deploymentName(resourceName)
 									.orderByDeploymenTime().desc().list();
 				if (historyDeployList == null || historyDeployList.size() == 0) {
 					// no deployment in history
@@ -82,11 +81,11 @@ public class DeployModelResourcesHepler implements InitializingBean {
 				}
 				
 				if (needDeploy) {
-					logger.info("need to deploy resource for " + resource.getFilename());
-					repositoryService.createDeployment().name(deploymentName).addInputStream(
+					logger.info("need to deploy resource for " + resourceName);
+					repositoryService.createDeployment().name(resourceName).addInputStream(
 							resourceName, resource.getInputStream()).deploy();
 				} else {
-					logger.info("no modifications for deploymentName: " + deploymentName);
+					logger.info("no modifications for deploymentName: " + resourceName);
 				}
 			} catch(Exception e) {
 				logger.error("deploy resource fails for " + resource.getFilename() + ","
