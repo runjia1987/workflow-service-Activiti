@@ -10,7 +10,7 @@ for jar in `find $PATH/WEB-INF/lib -print`; do
 done
 
 java -classpath ${CLASSPATH} \
-	me.andpay.wf.service.utils.CreateDbTables
+	org.wf.service.utils.CreateDbTables
 
 echo “create db schema finished.”
 
