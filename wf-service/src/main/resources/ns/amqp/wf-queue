@@ -1,5 +1,0 @@
-host=127.0.0.1
-virtualHost=/ti-lnk-wf
-username=wf
-password=wf
-channel-cache-size=10
