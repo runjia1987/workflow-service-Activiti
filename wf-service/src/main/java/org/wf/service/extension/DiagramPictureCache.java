@@ -30,7 +30,7 @@ public class DiagramPictureCache extends LinkedHashMap<String, String> {
 	@Override
 	protected boolean removeEldestEntry(
 			java.util.Map.Entry<String, String> eldest) {
-		if (cacheSize <= super.size()) {
+		if (cacheSize < super.size()) {
 			logger.info("cache number exceeds the cacheSize, will LRU removeEldestEntry. ");
 			return true;
 		} else {
