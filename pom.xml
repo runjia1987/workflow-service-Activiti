@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wf</groupId>
-	<artifactId>wf-service-simple</artifactId>
+	<artifactId>workflow-service-Activiti</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
-	<name>wf-service-simple</name>
-	<description>workflow service simple</description>
+	<name>workflow-service-Activiti</name>
+	<description>workflow-service-Activiti</description>
 
 	<properties>
 		<spring.version>3.1.2.RELEASE</spring.version>
